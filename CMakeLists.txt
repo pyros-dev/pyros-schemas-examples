@@ -25,6 +25,9 @@ roslint_python(${${PROJECT_NAME}_PY_SRCS})
 
 
 
+
+
+
 ##############################################################################
 # Catkin
 ##############################################################################
@@ -36,7 +39,17 @@ catkin_package()
 #######
 
 if (CATKIN_ENABLE_TESTING)
-  catkin_add_nosetests(tests)
+  #catkin_add_nosetests(tests)
+  find_package(rostest REQUIRED)
+  add_rostest(tests/test_httpbin.test)
 endif()
 
+#####
+# Install
+#####
 
+install(
+    PROGRAMS
+        nodes/httpbin_node.py
+    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+    )

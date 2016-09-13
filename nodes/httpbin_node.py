@@ -9,17 +9,29 @@ import functools
  - echo service
 """
 
-import roslib
-import rospy
-import std_msgs.msg as std_msgs
+try:
 
+    import roslib
+    import rospy
+    import std_msgs.msg as std_msgs
+    import pyros_schemas
 
-# TODO : get rid of this somehow ( dynamic generation or integration of more basic services in ROS )
-from pyros_test.srv import HttpbinIp, HttpbinGet, HttpbinPost
+    from pyros_test.srv import HttpbinIp, HttpbinGet, HttpbinPost
+
+except ImportError:
+    # Because we need to access Ros message types here (from ROS env or from virtualenv, or from somewhere else)
+    import pyros_setup
+    # We rely on default configuration in the environment to point us ot the proper distro and workspace
+    pyros_setup.configurable_import().configure().activate()
+
+    import roslib
+    import rospy
+    import std_msgs.msg as std_msgs
+    import pyros_schemas
+
+    from pyros_test.srv import HttpbinIp, HttpbinGet, HttpbinPost
 
 import marshmallow
-import pyros_schemas
-
 import requests
 
 
@@ -28,10 +40,9 @@ class HttpbinIpRequestSchema(marshmallow.Schema):
 
 
 class HttpbinIpResponseSchema(marshmallow.Schema):
-    status_code = pyros_schemas.HttpStatusCode()
-    ip = pyros_schemas.std_string()
+    status_code = pyros_schemas.RosMsgHttpStatusCode()
+    ip = pyros_schemas.RosMsgString()
     pass
-
 
 
 class HttpbinNode(object):
