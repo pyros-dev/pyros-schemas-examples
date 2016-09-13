@@ -1,0 +1,3 @@
+---
+pyros_msgs/HttpStatusCode status_code
+string got
