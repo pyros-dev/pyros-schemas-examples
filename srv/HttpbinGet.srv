@@ -1,3 +1,18 @@
+# This is not optional since we need to match response structure, we need to also send correct args for it.
+HttpbinGetArgs params
+
+# optional header submsg (one max)
+HttpRequestHeaders[] headers
+
 ---
-pyros_msgs/HttpStatusCode status_code
-string got
+uint16 status
+
+# args is a defined message in GET request answer : it is always there, and contain all args passed in request
+# => the content of the request needs to match expected response
+HttpbinGetArgs args
+
+# headers is not optional in GET request answer : it is always there, even if empty.
+HttpRequestHeaders headers
+
+string origin
+string url

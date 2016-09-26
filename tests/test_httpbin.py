@@ -3,12 +3,14 @@ from __future__ import print_function
 
 import sys
 
+
 try:
     import genpy
     import rospy
     import roslaunch
     import pyros_rosclient
     import pyros_utils
+    import pyros_schemas
 
 except ImportError:
     # Because we need to access Ros message types here (from ROS env or from virtualenv, or from somewhere else)
@@ -20,17 +22,17 @@ except ImportError:
     import roslaunch
     import pyros_rosclient
     import pyros_utils
+    import pyros_schemas
 
 import unittest
 import nose
 import logging
 import netaddr
-
-
+import marshmallow
 
 # test node process not setup by default (rostest dont need it here)
 httpbin_process = None
-
+httpbin_node_name = 'httpbin_node'
 
 # This should have the same effect as the <name>.test file for rostest.
 # Should be used only by nose ( or other python test tool )
@@ -46,7 +48,7 @@ def setup_module():
 
         global httpbin_process
 
-        httpbin_node = roslaunch.core.Node('pyros_rosclient', 'httpbin_node.py', name='httpbin_node')
+        httpbin_node = roslaunch.core.Node('pyros_rosclient', 'httpbin_node.py', name=httpbin_node_name)
         try:
             httpbin_process = launch.launch(httpbin_node)
         except roslaunch.RLException as rlexc:
@@ -69,28 +71,194 @@ def teardown_module():
 
 class TestHttpBin(unittest.TestCase):
 
-    def test_ip(self):
+    def test1_ip(self):
+        ip_service_name = '/' + httpbin_node_name + '/ip_service'
         # following http://wiki.ros.org/ROS/Tutorials/WritingServiceClient(python)
-        rospy.wait_for_service('httpbin_ip_service')
-        try:
-            httpbin_ip = rospy.ServiceProxy('httpbin_ip_service', pyros_rosclient.HttpbinIp)
-            resp = httpbin_ip()
+        rospy.wait_for_service(ip_service_name)
 
-            try:
-                addr = netaddr.IPAddress(resp)
-            except:
-                assert False and "Failed !"
-        except rospy.ServiceException as e:
-            print("Service call failed: {0}".format(e))
+        httpbin_ip = rospy.ServiceProxy(ip_service_name, pyros_rosclient.HttpbinIp)
+        resp = httpbin_ip()
 
+        assert resp.status == pyros_rosclient.msg.HttpStatusCode.OK
+        addr = netaddr.IPAddress(resp.ip)
+        # Test considered passing if we can validate an ip in resp
 
+    def test2_useragent(self):
+        useragent_service_name = '/' + httpbin_node_name + '/useragent_service'
+        # following http://wiki.ros.org/ROS/Tutorials/WritingServiceClient(python)
+        rospy.wait_for_service(useragent_service_name)
 
-    def test_get(self):
-        pass
+        httpbin_useragent = rospy.ServiceProxy(useragent_service_name, pyros_rosclient.HttpbinUserAgent)
+        resp = httpbin_useragent()
 
-    def test_post(self):
-        pass
+        assert resp.status == pyros_rosclient.msg.HttpStatusCode.OK
+        # currently the webgateway node uses python-request user-agent string.
+        assert resp.user_agent == 'python-requests/2.10.0'
 
+    def test3_headers(self):
+        headers_service_name = '/' + httpbin_node_name + '/headers_service'
+        # following http://wiki.ros.org/ROS/Tutorials/WritingServiceClient(python)
+        rospy.wait_for_service(headers_service_name)
+
+        httpbin_headers = rospy.ServiceProxy(headers_service_name, pyros_rosclient.HttpbinHeaders)
+        resp = httpbin_headers()
+
+        assert resp.status == pyros_rosclient.msg.HttpStatusCode.OK
+        #  We need to confirm we get the headers that should have been set by python-requests
+        assert resp.headers.Accept == ['*/*']
+        assert resp.headers.Accept_Encoding == ['gzip, deflate']
+        assert resp.headers.Host == ['httpbin.org']
+        assert resp.headers.User_Agent == ['python-requests/2.10.0']
+        # we currently allow other headers to vary
+
+    def test4_get(self):
+
+        get_service_name = '/' + httpbin_node_name + '/get_service'
+        # following http://wiki.ros.org/ROS/Tutorials/WritingServiceClient(python)
+        rospy.wait_for_service(get_service_name)
+
+        httpbin_get = rospy.ServiceProxy(get_service_name, pyros_rosclient.HttpbinGet)
+        req = pyros_rosclient.HttpbinGet._request_class(
+            params=pyros_rosclient.msg.HttpbinGetArgs(
+                arg='testarg',
+                # argopt='', # optional, let not care about it
+                arglist=['arg1', 'arg2']  # httpbin removes the list if only one arg here, but we do expect list in response.
+            ),
+            # headers=pyros_rosclient.msg.HttpRequestHeaders(), # optional, let not care about it
+        )
+        resp = httpbin_get(req)
+
+        assert resp.status == pyros_rosclient.msg.HttpStatusCode.OK
+        #  We need to confirm we get the headers that should have been set by python-requests
+        assert resp.headers.Accept == ['*/*']
+        assert resp.headers.Accept_Encoding == ['gzip, deflate']
+        assert resp.headers.Host == ['httpbin.org']
+        assert resp.headers.User_Agent == ['python-requests/2.10.0']
+        # we currently allow other headers to vary
+
+        # we need to confirm the arguments returned
+        assert resp.args.arg == 'testarg'
+        assert resp.args.arglist == ['arg1', 'arg2']
+
+    def test5_postjson(self):
+
+        post_service_name = '/' + httpbin_node_name + '/postjson_service'
+        # following http://wiki.ros.org/ROS/Tutorials/WritingServiceClient(python)
+        rospy.wait_for_service(post_service_name)
+
+        httpbin_post = rospy.ServiceProxy(post_service_name, pyros_rosclient.HttpbinPostJson)
+        ros_data = pyros_rosclient.msg.HttpbinPostBody(
+                testitem=pyros_rosclient.msg.HttpbinPostBody2(
+                    subteststring='teststr',
+                    # subtestoptstring='', optional, lets not care about it
+                    subteststringarray=['str1', 'str2', 'str3'],
+                    subtestint=42,
+                    # subtestoptint=21, #optional, lets not care about it
+                    subtestintarray=[4, 2, 1],
+                    subtestfloat=42.,
+                    # subtestoptfloat=21., #optional, lets not care about it
+                    subtestfloatarray=[4., 2., 1.],
+                ),
+                # testoptitem optional lets not care about it
+                testitemarray=[
+                    pyros_rosclient.msg.HttpbinPostBody2(
+                        subteststring='teststr1',
+                        # subtestoptstring='', optional, lets not care about it
+                        subteststringarray=['str1', 'str2', 'str3'],
+                        subtestint=42,
+                        # subtestoptint=21, #optional, lets not care about it
+                        subtestintarray=[4, 2, 1],
+                        subtestfloat=42.,
+                        # subtestoptfloat=21., #optional, lets not care about it
+                        subtestfloatarray=[4., 2., 1.],
+                    ),
+                    pyros_rosclient.msg.HttpbinPostBody2(
+                        subteststring='teststr2',
+                        # subtestoptstring='', optional, lets not care about it
+                        subteststringarray=['str1', 'str2', 'str3'],
+                        subtestint=42,
+                        # subtestoptint=21, #optional, lets not care about it
+                        subtestintarray=[4, 2, 1],
+                        subtestfloat=42.,
+                        # subtestoptfloat=21., #optional, lets not care about it
+                        subtestfloatarray=[4., 2., 1.],
+                    ),
+                ]
+            )
+        req = pyros_rosclient.HttpbinPostJson._request_class(
+            params=pyros_rosclient.msg.HttpbinPostArgs(
+                arg='testarg',
+                # argopt='', # optional, let not care about it
+                arglist=['arg1', 'arg2']
+                # httpbin removes the list if only one arg here, but we do expect list in response.
+                # TODO : fix this...
+            ),
+            # headers=pyros_rosclient.msg.HttpRequestHeaders(), # optional, let not care about it
+            json=ros_data,
+        )
+        resp = httpbin_post(req)
+
+        assert resp.status == pyros_rosclient.msg.HttpStatusCode.OK
+
+        #  We need to confirm we get the headers that should have been set by python-requests
+        assert resp.headers.Accept == ['*/*']
+        assert resp.headers.Accept_Encoding == ['gzip, deflate']
+        assert resp.headers.Host == ['httpbin.org']
+        assert resp.headers.User_Agent == ['python-requests/2.10.0']
+        # we currently allow other headers to vary
+
+        # we need to confirm the arguments returned
+        assert resp.args.arg == 'testarg'
+        assert resp.args.arglist == ['arg1', 'arg2']
+
+        # we need to confirm the data returned (careful ros messages change array into tuple, except for strings...)
+        assert resp.json.testitem.subteststring == 'teststr'
+        assert resp.json.testitem.subteststringarray == ['str1', 'str2', 'str3']
+        assert resp.json.testitem.subtestint == 42
+        assert resp.json.testitem.subtestintarray == (4, 2, 1)
+        assert resp.json.testitem.subtestfloat == 42.
+        assert resp.json.testitem.subtestfloatarray == (4., 2., 1.)
+        assert len(resp.json.testitemarray) == 2
+
+        assert resp.json.testitemarray[0].subteststring == 'teststr1'
+        assert resp.json.testitemarray[0].subteststringarray == ['str1', 'str2', 'str3']
+        assert resp.json.testitemarray[0].subtestint == 42
+        assert resp.json.testitemarray[0].subtestintarray == (4, 2, 1)
+        assert resp.json.testitemarray[0].subtestfloat == 42.
+        assert resp.json.testitemarray[0].subtestfloatarray == (4., 2., 1.)
+
+        assert resp.json.testitemarray[1].subteststring == 'teststr2'
+        assert resp.json.testitemarray[1].subteststringarray == ['str1', 'str2', 'str3']
+        assert resp.json.testitemarray[1].subtestint == 42
+        assert resp.json.testitemarray[1].subtestintarray == (4, 2, 1)
+        assert resp.json.testitemarray[1].subtestfloat == 42.
+        assert resp.json.testitemarray[1].subtestfloatarray == (4., 2., 1.)
+
+        # final serialization testing of content of data field in response
+        # TODO : avoid copying httpbin node content -> refactor
+        @pyros_schemas.with_explicitly_matched_type(pyros_rosclient.msg.HttpbinPostBody2)
+        class HttpbinPostBody2Schema(marshmallow.Schema):
+            subteststring = pyros_schemas.RosString()  # test string
+            subtestoptstring = pyros_schemas.RosOpt(pyros_schemas.RosString())  # test opt string
+            subteststringarray = pyros_schemas.RosList(pyros_schemas.RosString())  # test list string
+
+            subtestint = pyros_schemas.RosInt32()  # test int
+            subtestoptint = pyros_schemas.RosOpt(pyros_schemas.RosInt32())  # test opt int
+            subtestintarray = pyros_schemas.RosList(pyros_schemas.RosInt32())  # test list int
+
+            subtestfloat = pyros_schemas.RosFloat32()  # test float
+            subtestoptfloat = pyros_schemas.RosOpt(pyros_schemas.RosFloat32())  # test opt float
+            subtestfloatarray = pyros_schemas.RosList(pyros_schemas.RosFloat32())  # test list float
+
+        @pyros_schemas.with_explicitly_matched_type(pyros_rosclient.msg.HttpbinPostBody)
+        class HttpbinPostBodySchema(marshmallow.Schema):
+            testitem = pyros_schemas.RosNested(HttpbinPostBody2Schema)  # test string
+            testoptitem = pyros_schemas.RosOpt(pyros_schemas.RosNested(HttpbinPostBody2Schema))  # test opt string
+            testitemarray = pyros_schemas.RosList(pyros_schemas.RosNested(HttpbinPostBody2Schema))  # test list string
+
+        dataschema = HttpbinPostBodySchema()
+        resp_data_str, errors = dataschema.dumps(resp.json)
+        assert not errors and resp.data == resp_data_str
 
 # Just in case we run this directly
 if __name__ == '__main__':

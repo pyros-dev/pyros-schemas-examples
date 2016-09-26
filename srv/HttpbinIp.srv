@@ -1,3 +1,4 @@
 ---
-pyros_msgs/HttpStatusCode status_code
+#pyros_msgs/HttpStatusCode status
+uint16 status
 string ip

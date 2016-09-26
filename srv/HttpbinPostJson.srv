@@ -1,0 +1,28 @@
+# This is not optional since we need to match response structure, we need to also send correct args for it.
+HttpbinPostArgs params
+
+# This is optional, or contains only one HttpHeaders message
+HttpRequestHeaders[] headers
+
+# This is not optional since we need to match response structure, we need to also send correct args for it.
+HttpbinPostBody json
+
+---
+#pyros_msgs/HttpStatusCode
+uint16 status
+
+# this is not optional : it is always present in response
+HttpbinPostArgs args
+
+# this is not optional : it is always present in response
+string data
+
+# this is not optional : it is always present in response
+HttpRequestHeaders headers
+
+# this is not optional : it is always present in response
+HttpbinPostBody json
+
+
+string origin
+string url
