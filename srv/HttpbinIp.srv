@@ -1,4 +1,4 @@
 ---
 #pyros_msgs/HttpStatusCode status
-uint16 status
-string ip
+#uint16 status
+string origin

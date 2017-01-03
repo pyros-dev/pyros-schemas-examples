@@ -1,6 +1,6 @@
 ---
 #pyros_msgs/HttpStatusCode status
-uint16 status
+#uint16 status
 
 string user_agent                   # "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:48.0) Gecko/20100101 Firefox/48.0"
 

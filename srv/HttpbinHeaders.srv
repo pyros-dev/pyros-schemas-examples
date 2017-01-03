@@ -1,7 +1,7 @@
 # ROS headers from request will be passed as HTTP headers
 HttpRequestHeaders headers
 ---
-uint16 status
+#uint16 status
 
 # The requests headers are returned here, as part of the body of the response
 HttpRequestHeaders headers

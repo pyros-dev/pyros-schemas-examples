@@ -5,7 +5,7 @@ HttpbinGetArgs params
 HttpRequestHeaders[] headers
 
 ---
-uint16 status
+#uint16 status
 
 # args is a defined message in GET request answer : it is always there, and contain all args passed in request
 # => the content of the request needs to match expected response
