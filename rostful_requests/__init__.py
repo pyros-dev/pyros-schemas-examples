@@ -14,3 +14,4 @@ The intent here is to wrap the requests library in a thin layer and make it usab
 """
 
 
+from .api import with_service_schemas

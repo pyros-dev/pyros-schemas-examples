@@ -138,7 +138,7 @@ class TestHttpBin(unittest.TestCase):
         rospy.wait_for_service(get_service_name)
 
         httpbin_get = rospy.ServiceProxy(get_service_name, pyros_rosclient.HttpbinGet)
-        req = pyros_rosclient.HttpbinGet._request_class(
+        req = pyros_rosclient.HttpbinGetRequest(
             params=pyros_rosclient.msg.HttpbinGetArgs(
                 arg='testarg',
                 # argopt='', # optional, let not care about it

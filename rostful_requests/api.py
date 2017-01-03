@@ -9,6 +9,8 @@ It is intentionally reproducing the requests library API
 
 """
 
+from functools import wraps
+
 try:
 
     import roslib
@@ -52,7 +54,35 @@ class RostfulRequestServiceResponseException(RostfulRequestServiceException):
     """Base class for rostful_requests service-related exceptions"""
     pass
 
-# TODO : exceptions with meaningful web error code explanation...
+# TODO : exceptions with meaningful web error code explanation OR proper Exception forwarding...
+
+
+def with_service_schemas(service_class):
+    def with_service_schemas_decorator(func):
+        @wraps(func)
+        def func_wrapper(data):  # we need to expose only one argument for ROS
+
+            try:
+                request_schema = pyros_schemas.create(service_class._request_class)
+                data_dict, errors = request_schema.load(data)
+
+                response = func(data, data_dict, errors)  # we should call the function with original and parsed argument, including potential errors, just in case, at least temporarily...
+            except Exception as e:
+                raise RostfulRequestServiceRequestException(e)
+
+            if response.status_code == requests.status_codes.codes.OK:  # TODO : easy way to check all "OK" codes
+                try:
+                    response_schema = pyros_schemas.create(service_class._response_class)
+                    response_ros, errors = response_schema.dump(response.json())
+
+                    return response_ros
+                except Exception as e:
+                    raise RostfulRequestServiceResponseException(e)
+            else:
+                raise RostfulRequestServiceResponseException(response.status_code)
+
+        return func_wrapper
+    return with_service_schemas_decorator
 
 
 def request(method, url, ros_data, service_class, **kwargs):
