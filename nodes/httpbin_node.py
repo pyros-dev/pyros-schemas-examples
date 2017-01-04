@@ -4,10 +4,11 @@ from __future__ import absolute_import
 import json
 
 """
- A very simple echo ROS node class.
- - echo from topic to echo_topic
- - echo service
+ A very simple ROS node to Abstract HttpBin Web/REST API, and make it accessible from ROS systems.
+
 """
+
+import requests
 
 try:
 
@@ -54,45 +55,60 @@ pyros_msgs.opt_as_array.duck_punch(HttpbinPostArgs, ['argopt'])
 pyros_msgs.opt_as_array.duck_punch(HttpbinPostBody, ['testoptitem'])
 pyros_msgs.opt_as_array.duck_punch(HttpbinPostBody2, ['subtestoptstring', 'subtestoptint', 'subtestoptfloat'])
 
-import marshmallow
-import requests
 
 ##########
 # Services
 ##########
 
+class StatusCodeException(Exception):
+    pass
 
-import requests
-import rostful_requests
 
-
-@rostful_requests.with_service_schemas(HttpbinIp)
+@pyros_schemas.with_service_schemas(HttpbinIp)
 def httpbin_ip_callback(data, data_dict, errors):
-    return requests.get('http://httpbin.org/ip', data=data_dict)
+    response = requests.get('http://httpbin.org/ip', data=data_dict)
+    if response.status_code == requests.status_codes.codes.OK:  # TODO : easy way to check all "OK" codes
+        return response.json()
+    else:
+        raise StatusCodeException(response.status_code)
 
 
-@rostful_requests.with_service_schemas(HttpbinUserAgent)
+@pyros_schemas.with_service_schemas(HttpbinUserAgent)
 def httpbin_useragent_callback(data, data_dict, errors):
-    return requests.get('http://httpbin.org/user-agent', data=data_dict)
+    response = requests.get('http://httpbin.org/user-agent', data=data_dict)
+    if response.status_code == requests.status_codes.codes.OK:  # TODO : easy way to check all "OK" codes
+        return response.json()
+    else:
+        raise StatusCodeException(response.status_code)
 
 
-@rostful_requests.with_service_schemas(HttpbinHeaders)
+@pyros_schemas.with_service_schemas(HttpbinHeaders)
 def httpbin_headers_callback(data, data_dict, errors):
-    return requests.get('http://httpbin.org/headers', headers=data_dict.get('headers', {}))
+    response = requests.get('http://httpbin.org/headers', headers=data_dict.get('headers', {}))
+    if response.status_code == requests.status_codes.codes.OK:  # TODO : easy way to check all "OK" codes
+        return response.json()
+    else:
+        raise StatusCodeException(response.status_code)
 
 
-@rostful_requests.with_service_schemas(HttpbinGet)
+@pyros_schemas.with_service_schemas(HttpbinGet)
 def httpbin_get_callback(data, data_dict, errors):
-    return requests.get('http://httpbin.org/get', headers=data_dict.get('headers', {}), params=data_dict.get('params', {}))
+    response = requests.get('http://httpbin.org/get', headers=data_dict.get('headers', {}), params=data_dict.get('params', {}))
+    if response.status_code == requests.status_codes.codes.OK:  # TODO : easy way to check all "OK" codes
+        return response.json()
+    else:
+        raise StatusCodeException(response.status_code)
 
 
-@rostful_requests.with_service_schemas(HttpbinPostJson)
+@pyros_schemas.with_service_schemas(HttpbinPostJson)
 def httpbin_postjson_callback(data, data_dict, errors):
     print (" => {0}".format(data_dict))  # to help with debugging
     response = requests.post('http://httpbin.org/post', headers=data_dict.get('headers', {}), params=data_dict.get('params'), json=data_dict.get('json'))
-    print (" <= {0}".format(response.json()))
-    return response
-
+    if response.status_code == requests.status_codes.codes.OK:  # TODO : easy way to check all "OK" codes
+        print (" <= {0}".format(response.json()))
+        return response.json()
+    else:
+        raise StatusCodeException(response.status_code)
 
 
 ##########

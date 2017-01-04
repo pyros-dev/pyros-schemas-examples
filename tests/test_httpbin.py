@@ -102,7 +102,7 @@ class TestHttpBin(unittest.TestCase):
         resp = httpbin_useragent()
 
         # currently the webgateway node uses python-request user-agent string.
-        assert resp.user_agent == 'python-requests/2.10.0' or print(resp.user_agent)
+        assert resp.user_agent == 'python-requests/2.10.0', resp.user_agent
 
     def test2_useragent_raises(self):
         useragent_service_name = '/' + httpbin_node_name + '/useragent_service'
@@ -113,8 +113,7 @@ class TestHttpBin(unittest.TestCase):
         with nose.tools.assert_raises(TypeError) as cm:
             resp = httpbin_useragent({'wrong': 'data'})
         ex = cm.exception  # raised exception is available through exception property of context
-        assert ex.message == "Invalid number of arguments, args should be [] args are({'wrong': 'data'},)" or print(
-            ex.message)
+        assert ex.message == "Invalid number of arguments, args should be [] args are({'wrong': 'data'},)", ex.message
 
     def test3_headers(self):
         headers_service_name = '/' + httpbin_node_name + '/headers_service'
