@@ -130,9 +130,3 @@ class HttpbinNode(object):
 
     def spin(self):
         rospy.spin()
-
-
-if __name__ == '__main__':
-    rospy.init_node('pyros_rosclient_httpbin')
-    node = HttpbinNode()
-    node.spin()

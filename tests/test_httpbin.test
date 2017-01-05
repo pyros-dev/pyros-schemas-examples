@@ -1,5 +1,0 @@
-<launch>
-  <node name="httpbin_node" pkg="pyros_rosclient" type="httbin_node.py" output="screen"/>
-
-  <test test-name="Httpbin" pkg="pyros_rosclient" type="test_httpbin.py" name="Httpbin_client"/>
-</launch>

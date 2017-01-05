@@ -1,0 +1,5 @@
+<launch>
+  <node name="httpbin_node" pkg="pyros_httpbin" type="httbin.py" output="screen"/>
+
+  <test test-name="Httpbin" pkg="pyros_httpbin" type="test_httpbin.py" name="Httpbin_client"/>
+</launch>
