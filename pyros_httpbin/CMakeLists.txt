@@ -3,7 +3,7 @@
 ##############################################################################
 
 cmake_minimum_required(VERSION 2.8.3)
-project(pyros_rosclient)
+project(pyros_httpbin)
 
 ##############################################################################
 # Find Packages
@@ -63,7 +63,7 @@ add_service_files(
     HttpbinPostJson.srv
 )
 
-generate_messages(DEPENDENCIES std_msgs)
+generate_messages(DEPENDENCIES pyros_msgs std_msgs)
 
 
 ##############################################################################
