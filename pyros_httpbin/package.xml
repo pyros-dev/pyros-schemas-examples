@@ -26,6 +26,8 @@
 
   <exec_depend version_gte="0.4.12">message_runtime</exec_depend>
 
+  <test_depend version_gte="0.7.10">python-netaddr</test_depend>
+
   <!-- documentation dependencies -->
   <doc_depend version_gte="0.2.10">python-catkin-pkg</doc_depend>
 

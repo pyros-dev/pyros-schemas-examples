@@ -10,6 +10,7 @@ project(pyros_httpbin)
 ##############################################################################
 
 find_package(catkin REQUIRED COMPONENTS
+    catkin_pip
     roslint
     pyros_msgs
     std_msgs
@@ -21,14 +22,6 @@ find_package(catkin REQUIRED COMPONENTS
 ##############################################################################
 # Python Configuration
 ##############################################################################
-
-catkin_python_setup()
-
-
-# Lint Python modules
-file(GLOB_RECURSE ${PROJECT_NAME}_PY_SRCS
-     RELATIVE ${PROJECT_SOURCE_DIR} pyros_rosclient/*.py)
-roslint_python(${${PROJECT_NAME}_PY_SRCS})
 
 
 #####
@@ -70,7 +63,7 @@ generate_messages(DEPENDENCIES pyros_msgs std_msgs)
 # Catkin
 ##############################################################################
 
-catkin_package()
+catkin_pip_package(pyros_httpbin)
 
 #########
 # Tests
@@ -88,6 +81,6 @@ endif()
 
 install(
     PROGRAMS
-        nodes/httpbin_node.py
+        nodes/httpbin.py
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
     )
