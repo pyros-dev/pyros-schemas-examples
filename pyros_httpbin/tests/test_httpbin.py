@@ -212,7 +212,7 @@ class TestHttpBin(unittest.TestCase):
                 # TODO : fix this...
             ),
             # headers=pyros_httpbin.msg.HttpRequestHeaders(), # optional, let not care about it
-            json=ros_data,
+            json=ros_data
         )
         resp = httpbin_post(req)
 
@@ -220,7 +220,7 @@ class TestHttpBin(unittest.TestCase):
         assert resp.headers.Accept == ['*/*']
         assert resp.headers.Accept_Encoding == ['gzip, deflate, compress']
         assert resp.headers.Host == ['httpbin.org']
-        assert resp.headers.User_Agent == ['python-requests/2.10.0']
+        assert 'python-requests' in resp.headers.User_Agent[0]
         # we currently allow other headers to vary
 
         # we need to confirm the arguments returned

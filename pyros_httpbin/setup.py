@@ -22,6 +22,9 @@ setuptools.setup(name='pyros_httpbin',
     install_requires=[
 
     ],
+    namespace_packages=[
+        'pyros_httpbin'
+    ],
     zip_safe=False,  # TODO testing...
 )
 

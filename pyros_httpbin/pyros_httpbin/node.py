@@ -103,7 +103,20 @@ def httpbin_get_callback(data, data_dict, errors):
 @pyros_schemas.with_service_schemas(HttpbinPostJson)
 def httpbin_postjson_callback(data, data_dict, errors):
     print (" => {0}".format(data_dict))  # to help with debugging
-    response = requests.post('http://httpbin.org/post', headers=data_dict.get('headers', {}), params=data_dict.get('params'), json=data_dict.get('json'))
+    # TODO : check by supported distro
+    # Kinetic (needs a recent version of python-requests)
+    # response = requests.post('http://httpbin.org/post', headers=data_dict.get('headers', {}), params=data_dict.get('params'), json=data_dict.get('json'))
+    # Indigo / Jade
+
+    # To support indigo we need to do that :
+    # json=data_dict.get('json'),
+    # the the old way :
+    h = data_dict.get('headers', {})
+    h.update({"Content-type": "application/json"})
+    p = data_dict.get('params')
+    d = data_dict.get('json')
+    response = requests.post('http://httpbin.org/post', headers=h, params=p, data = json.dumps(d))
+
     if response.status_code == requests.status_codes.codes.OK:  # TODO : easy way to check all "OK" codes
         print (" <= {0}".format(response.json()))
         return response.json()
