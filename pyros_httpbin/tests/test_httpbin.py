@@ -8,7 +8,7 @@ try:
     import genpy
     import rospy
     import roslaunch
-    import pyros_httpbin
+    import pyros_httpbin.msg, pyros_httpbin.srv
     import pyros_utils
     import pyros_schemas
 

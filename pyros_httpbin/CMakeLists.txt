@@ -70,9 +70,10 @@ catkin_pip_package(pyros_httpbin)
 #######
 
 if (CATKIN_ENABLE_TESTING)
-  #catkin_add_nosetests(tests)
-  find_package(rostest REQUIRED)
-  add_rostest(tests/test_httpbin.test)
+  catkin_add_pytests(tests/test_httpbin.py)
+  # Removing. somehow rostest cannot run the httpbin node. Rostest is too buggy we should drop it.
+  #find_package(rostest REQUIRED)
+  #add_rostest(tests/test_httpbin.test)
 endif()
 
 #####
