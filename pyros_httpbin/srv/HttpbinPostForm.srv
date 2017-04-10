@@ -8,9 +8,6 @@ HttpRequestHeaders[] headers
 HttpFormItem[] form
 
 ---
-#pyros_msgs/HttpStatusCode
-uint16 status
-
 # this is not optional : it is always present in response
 HttpbinPostArgs args
 
