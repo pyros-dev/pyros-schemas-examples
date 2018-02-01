@@ -38,3 +38,8 @@ easy_install netaddr, when occur no module netaddr
 git clone https://github.com/pyros-dev/pyros-setup.git & cd pyros-setup & python setup.py install, when occur no module pyros_setup
 
 cd pyros_schemas-examples/build & source devel/setup.bash, when occur path error
+
+## Docker
+
+docker run -it --rm --name yujin-d3-devel-memory_leak_test --network=host zaxrok/yujin-d3:devel-memory_leak_test bash
+
