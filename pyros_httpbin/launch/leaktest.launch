@@ -1,0 +1,4 @@
+<launch>
+	<node name="memory_leak_test" pkg="pyros_httpbin" type="leaktest.py">
+	</node>
+</launch>
