@@ -31,4 +31,10 @@ or
 
 roslaunch pyros_httpbin leaktest.launch --screen
 
+## Troubleshooting
 
+easy_install netaddr, when occur no module netaddr
+
+git clone https://github.com/pyros-dev/pyros-setup.git & cd pyros-setup & python setup.py install, when occur no module pyros_setup
+
+cd pyros_schemas-examples/build & source devel/setup.bash, when occur path error
