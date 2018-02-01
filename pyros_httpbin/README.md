@@ -10,3 +10,25 @@ In particular we need to find out how to mix and match:
 - library to easily build ros-web client (and zmp-web ?)
 - test for a ros-web client using httpbin
 - gopher software application (for yujinrobot)
+
+---
+## test
+
+mkdir build
+
+cd build & cmake ../ & make & source devel/setup.bash & make test
+
+or
+
+py.test ../tests/test_httpbin.py -vv
+
+
+## test for memory leak
+
+source devel/setup.bash & cd ../scripts & ./leaktest.sh
+
+or
+
+roslaunch pyros_httpbin leaktest.launch --screen
+
+
