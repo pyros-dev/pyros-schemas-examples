@@ -1,7 +1,7 @@
 # pyros-rosclient
 Package to use Pyros as a ROS client to other multiprocess architecture ( Web or others )
 
-The location & name & structure of this repo might change soon. It s still early deevlopment and quite unstable.
+The location & name & structure of this repo might change soon. It's still in early development and quite unstable.
 
 In particular we need to find out how to mix and match:
 
