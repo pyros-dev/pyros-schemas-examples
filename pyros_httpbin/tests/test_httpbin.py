@@ -29,6 +29,7 @@ import nose
 import logging
 import netaddr
 import marshmallow
+import pytest
 
 # test node process not setup by default (rostest dont need it here)
 httpbin_process = None
@@ -67,7 +68,6 @@ def teardown_module():
             httpbin_process.stop()
 
         pyros_utils.rostest_nose.rostest_nose_teardown_module()
-
 
 class TestHttpBin(unittest.TestCase):
 

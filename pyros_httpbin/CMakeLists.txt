@@ -70,10 +70,10 @@ catkin_pip_package(pyros_httpbin)
 #######
 
 if (CATKIN_ENABLE_TESTING)
-  catkin_add_pytests(tests/test_httpbin.py)
+  # catkin_add_pytests(tests/test_httpbin.py)
   # Removing. somehow rostest cannot run the httpbin node. Rostest is too buggy we should drop it.
   #find_package(rostest REQUIRED)
-  #add_rostest(tests/test_httpbin.test)
+  catkin_add_nosetests(tests/test_httpbin.py)
 endif()
 
 #####
@@ -83,5 +83,8 @@ endif()
 install(
     PROGRAMS
         nodes/httpbin.py
+		nodes/leaktest.py
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
     )
+
+install(DIRECTORY launch DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
